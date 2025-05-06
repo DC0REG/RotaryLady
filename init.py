@@ -10,6 +10,7 @@ def circular_mask(img_h, img_w, center_x, center_y, radius):
     y, x = np.ogrid[:img_h, :img_w]
     dist_from_center = (x - center_x)**2 + (y - center_y)**2
     mask = dist_from_center <= radius**2
+    mask = mask.astype(np.uint8)
     return mask
 
 def create_fan(angle):
@@ -45,8 +46,8 @@ def get_pixelatet_count_all(fans_triangles_int_shift_10):
 			img_temp.fill(0)
 			points = triangle.reshape((-1, 1, 2))
 			cv2.fillConvexPoly(img_temp, points = points, color= (255), shift=10, lineType = cv2.LINE_AA)
-			img_temp[~circle_mask] = 0
-			pixel_count += np.count_nonzero(img_temp)
+			img_temp = cv2.bitwise_and(img_temp, img_temp, mask=circle_mask)
+			pixel_count += cv2.countNonZero(img_temp)
 			param.img_sum[fan_index] += img_temp
 		print(	"{:>5} /".format(fan_index),
 				"{:>5}".format(param.LASERCOUNT),
